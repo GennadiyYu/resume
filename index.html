@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Резюме по вопросам</title>
+<style>
+  /* ============ 1. СТИЛИ (тема — меняйте переменные) ============ */
+  :root {
+    --bg: #eef1f6; --panel: #ffffff; --ink: #16202e; --muted: #5b6678;
+    --line: #d5dbe6; --accent: #2f5bea; --accent-ink: #ffffff;
+    --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-cv: Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-ui); line-height: 1.5; }
+  .layout { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; gap: 24px; max-width: 1200px; margin: 0 auto; padding: 24px; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; align-self: start; }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 20px; }
+  .progress > div { height: 100%; background: var(--accent); transition: width .25s; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .hint { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+  label { display: block; font-size: .9rem; font-weight: 600; margin-bottom: 14px; }
+  input, textarea, select { display: block; width: 100%; margin-top: 4px; padding: 9px 11px; font: inherit; font-weight: 400;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); }
+  input:focus, textarea:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { min-height: 84px; resize: vertical; }
+  .group { border: 1px dashed var(--line); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+  .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  button { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.link { border: none; background: none; color: var(--accent); padding: 4px 0; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .ai-row { margin: -6px 0 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ai-row button { padding: 5px 12px; font-size: .85rem; }
+  .ai-status { font-size: .8rem; color: var(--muted); }
+  .ai-connection { font-size: .8rem; color: var(--muted); margin: 4px 0 12px; }
+  .ai-connection.warning { color: #9b3b27; }
+  .ai-all { width: 100%; text-align: center; margin: 4px 0 10px; }
+  .photo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .photo-row img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
+  .photo-row input { margin: 0; }
+  .privacy { font-size: .8rem; color: var(--muted); margin-top: 16px; }
+
+  /* Лист резюме */
+  .paper { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 40px 44px; min-height: 640px;
+    font-family: var(--font-cv); box-shadow: 0 1px 2px rgba(22,32,46,.08); }
+  .paper .head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  .paper .photo { width: 112px; height: 112px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .paper h2 { font-size: 1.9rem; margin: 0; }
+  .paper .role { color: var(--accent); font-size: 1.1rem; margin: 2px 0 6px; }
+  .paper .contacts { color: var(--muted); font-size: .9rem; }
+  .paper h3 { font-size: 1rem; border-bottom: 1px solid var(--line); padding-bottom: 4px; margin: 24px 0 10px; }
+  .paper .item { margin-bottom: 12px; }
+  .paper .item-head { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; }
+  .paper .item-head span:last-child { font-weight: 400; color: var(--muted); }
+  .paper .item p { margin: 2px 0 0; white-space: pre-line; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips span { border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; font-size: .9rem; }
+  .empty { color: var(--muted); font-style: italic; }
+
+  /* Печать: только лист резюме */
+  /* margin:0 убирает дату, адрес страницы, название и номера страниц, которые браузер дописывает по краям */
+  @page { size: A4; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .panel { display: none; }
+    .layout { display: block; padding: 0; max-width: none; }
+    .paper { border: none; border-radius: 0; box-shadow: none; min-height: 0; padding: 16mm 18mm;
+      box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <section class="panel" id="wizard" aria-live="polite"></section>
+  <section class="paper" id="resume" aria-label="Предпросмотр резюме"></section>
+</div>
+<datalist id="cities"></datalist>
+
+<script>
+/* ============ 0. НАСТРОЙКИ ============
+   ИИ работает через сервер (server.js): API-ключ хранится там, в файле .env, а не на странице. */
+let format = "pdf";            // выбранный формат скачивания: "pdf" | "doc"
+let aiConnection = "Проверяем подключение ИИ…";
+let aiConnected = false;
+
+/* Список городов для подсказок (можно дополнять; вручную писать тоже можно) */
+const CITIES = ["Москва","Санкт-Петербург","Новосибирск","Екатеринбург","Казань","Нижний Новгород","Челябинск","Самара","Омск","Ростов-на-Дону","Уфа","Красноярск","Воронеж","Пермь","Волгоград","Краснодар","Саратов","Тюмень","Тольятти","Ижевск","Барнаул","Ульяновск","Иркутск","Хабаровск","Ярославль","Владивосток","Махачкала","Томск","Оренбург","Кемерово","Новокузнецк","Рязань","Астрахань","Набережные Челны","Пенза","Липецк","Киров","Чебоксары","Тула","Калининград","Курск","Севастополь","Симферополь","Улан-Удэ","Сочи","Ставрополь","Белгород","Брянск","Владимир","Иваново","Калуга","Кострома","Курган","Мурманск","Нижневартовск","Новороссийск","Орёл","Петрозаводск","Псков","Смоленск","Сургут","Тверь","Тамбов","Якутск","Архангельск","Вологда","Великий Новгород","Грозный","Магнитогорск","Йошкар-Ола","Саранск","Сыктывкар","Чита","Нальчик","Владикавказ","Благовещенск","Южно-Сахалинск","Петропавловск-Камчатский","Магадан","Абакан","Горно-Алтайск","Элиста","Майкоп","Черкесск","Анадырь"];
+
+/* ============ 2. ВОПРОСЫ (главное место для правок) ============
+   Хотите новый вопрос — добавьте объект в STEPS.
+   type: "fields" — обычные поля, "group" — повторяемый блок (опыт, образование).
+   Поле: { key, label, type: "text" | "textarea" | "tel" | "date" | "photo", placeholder,
+           list: "cities" (подсказки), ai: "summary" | "desc" | "skills" (кнопка ИИ) } */
+const STEPS = [
+  { id: "basics", title: "Как вас зовут?", hint: "Эти данные будут в шапке резюме.", type: "fields",
+    fields: [
+      { key: "photo", label: "Фото", type: "photo" },
+      { key: "name",  label: "Имя и фамилия", type: "text", placeholder: "Анна Иванова" },
+      { key: "title", label: "Желаемая должность", type: "text", placeholder: "Frontend-разработчик" },
+      { key: "birth", label: "Дата рождения", type: "date" },
+      { key: "email", label: "Email", type: "text", placeholder: "anna@example.com" },
+      { key: "phone", label: "Телефон", type: "tel", placeholder: "+7 (900) 000-00-00" },
+      { key: "city",  label: "Город", type: "text", placeholder: "Начните вводить или выберите", list: "cities" }
+    ] },
+  { id: "summary", title: "Расскажите о себе", hint: "2–3 предложения: кто вы и чем полезны.", type: "fields",
+    fields: [ { key: "summary", label: "О себе", type: "textarea", placeholder: "Начинающий разработчик, люблю…", ai: "summary" } ] },
+  { id: "experience", title: "Где вы работали?", hint: "Можно добавить несколько мест или пропустить.", type: "group",
+    addLabel: "Добавить место работы",
+    fields: [
+      { key: "company", label: "Компания", type: "text" },
+      { key: "role",    label: "Должность", type: "text" },
+      { key: "period",  label: "Период", type: "text", placeholder: "2022 – 2024" },
+      { key: "desc",    label: "Чем занимались", type: "textarea", ai: "desc" }
+    ] },
+  { id: "education", title: "Где вы учились?", hint: "Вуз, курсы, сертификаты.", type: "group",
+    addLabel: "Добавить образование",
+    fields: [
+      { key: "school", label: "Учебное заведение", type: "text" },
+      { key: "degree", label: "Специальность", type: "text" },
+      { key: "period", label: "Период", type: "text", placeholder: "2021 – 2025" }
+    ] },
+  { id: "skills", title: "Что вы умеете?", hint: "Перечислите навыки через запятую.", type: "fields",
+    fields: [ { key: "skills", label: "Навыки", type: "text", placeholder: "HTML, CSS, JavaScript, английский B2", ai: "skills" } ] }
+];
+
+/* ============ 3. СОСТОЯНИЕ (только в памяти, ничего не сохраняем) ============ */
+let data = {};      // ответы пользователя (фото хранится как data-URL)
+let current = 0;    // номер текущего шага; STEPS.length = финальный экран
+
+const $ = (sel) => document.querySelector(sel);
+const esc = (s = "") => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+function initData() {
+  data = {};
+  STEPS.forEach(s => { if (s.type === "group") data[s.id] = [{}]; });
+}
+
+/* ============ 3.1 ПОМОЩНИКИ: телефон, дата ============ */
+// Маска +7 (XXX) XXX-XX-XX. Первая 7/8 считается кодом страны.
+function formatPhone(raw) {
+  let d = raw.replace(/\D/g, "");
+  if (d[0] === "7" || d[0] === "8") d = d.slice(1);
+  d = d.slice(0, 10);
+  let out = "+7";
+  if (d.length) out += " (" + d.slice(0, 3);
+  if (d.length >= 3) out += ")";
+  if (d.length > 3) out += " " + d.slice(3, 6);
+  if (d.length > 6) out += "-" + d.slice(6, 8);
+  if (d.length > 8) out += "-" + d.slice(8, 10);
+  return { text: out, digits: d.length };
+}
+const fmtDate = (iso) => iso ? iso.split("-").reverse().join(".") : "";
+
+/* ============ 3.2 ИИ (Gemini) ============ */
+async function askGemini(ai, text) {
+  let res;
+  try {
+    res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ai, text }) });
+  } catch { throw new Error("нет связи с сервером. Запустите его командой npm start и откройте http://localhost:3000"); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || "ошибка сервера");
+  return json.text;
+}
+
+async function improveField(btn) {
+  const { group, idx, key, ai } = btn.dataset;
+  const sel = `[data-key="${key}"]` + (group ? `[data-group="${group}"][data-idx="${idx}"]` : "");
+  const el = $(sel), status = btn.nextElementSibling;
+  if (!el.value.trim()) { status.textContent = "Сначала напишите хоть пару слов."; return; }
+  btn.disabled = true; status.textContent = "ИИ работает…";
+  try {
+    el.value = await askGemini(ai, el.value);
+    if (group) data[group][idx][key] = el.value; else data[key] = el.value;
+    renderResume();
+    status.textContent = "Готово — можно поправить вручную.";
+  } catch (err) {
+    status.textContent = "Ошибка: " + err.message;
+  } finally { btn.disabled = false; }
+}
+
+/* Проверяем, запущен ли сервер и задан ли ключ. Не отправляем ключ браузеру. */
+async function checkAiConnection() {
+  try {
+    const response = await fetch('/api/status', { cache: 'no-store' });
+    if (!response.ok) throw new Error('нет API');
+    const status = await response.json();
+    aiConnected = Boolean(status.keyConfigured);
+    aiConnection = aiConnected
+      ? `ИИ: сервер подключён, модель ${status.model}.` // это НЕ проверка действительности ключа
+      : 'ИИ недоступен: укажите GEMINI_API_KEY в .env или настройках хостинга.';
+  } catch (_) {
+    aiConnected = false;
+    aiConnection = 'ИИ недоступен: необходим Node.js сервер. На GitHub Pages API не работает.';
+  }
+  renderWizard();
+}
+
+async function improveWholeResume(btn) {
+  const status = btn.nextElementSibling;
+  const resume = {
+    title: data.title || '',
+    summary: data.summary || '',
+    skills: data.skills || '',
+    experience: (data.experience || []).map(x => ({ desc: x.desc || '' }))
+  };
+  if (!resume.summary.trim() && !resume.skills.trim() && !resume.experience.some(x => x.desc.trim())) {
+    status.textContent = 'Сначала заполните «О себе», опыт работы или навыки.';
+    return;
+  }
+  btn.disabled = true;
+  status.textContent = 'ИИ редактирует все разделы…';
+  try {
+    const response = await fetch('/api/ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ai: 'resume', resume })
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.error || 'ошибка сервера');
+    const updated = json.resume;
+    if (!updated || typeof updated !== 'object') throw new Error('некорректный ответ ИИ');
+    if (typeof updated.summary === 'string' && resume.summary.trim()) data.summary = updated.summary;
+    if (typeof updated.skills === 'string' && resume.skills.trim()) data.skills = updated.skills;
+    if (Array.isArray(updated.experience)) {
+      for (const item of updated.experience) {
+        if (Number.isInteger(item.index) && data.experience[item.index] &&
+            resume.experience[item.index]?.desc.trim() && typeof item.desc === 'string') {
+          data.experience[item.index].desc = item.desc;
+        }
+      }
+    }
+    renderResume();
+    status.textContent = 'Готово! Все изменённые тексты можно проверить и отредактировать, вернувшись к шагам.';
+  } catch (err) {
+    status.textContent = 'Ошибка: ' + err.message;
+  } finally { btn.disabled = false; }
+}
+
+/* ============ 4. ФОРМА-МАСТЕР ============ */
+function fieldHTML(f, value, group, idx) {
+  if (f.type === "photo") {
+    return `<div class="photo-row">${data.photo ? `<img src="${data.photo}" alt="Ваше фото">` : ""}
+      <div><label style="margin:0">${esc(f.label)}<input type="file" accept="image/*" data-photo="1"></label>
+      ${data.photo ? `<button class="link" data-action="remove-photo">Убрать фото</button>` : ""}</div></div>`;
+  }
+  const attrs = `data-key="${f.key}"` + (group ? ` data-group="${group}" data-idx="${idx}"` : "");
+  const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : "";
+  let control;
+  if (f.type === "textarea") control = `<textarea ${attrs}${ph}>${esc(value)}</textarea>`;
+  else if (f.type === "date") control = `<input type="date" ${attrs} max="${new Date().toISOString().slice(0, 10)}" value="${esc(value)}">`;
+  else if (f.type === "tel") control = `<input type="tel" inputmode="tel" ${attrs}${ph} value="${esc(value)}">`;
+  else control = `<input type="text" ${attrs}${ph}${f.list ? ` list="${f.list}" autocomplete="off"` : ""} value="${esc(value)}">`;
+  let html = `<label>${esc(f.label)}${control}</label>`;
+  if (f.ai) {
+    html += `<div class="ai-row"><button type="button" data-action="ai" data-ai="${f.ai}" data-key="${f.key}"` +
+      (group ? ` data-group="${group}" data-idx="${idx}"` : "") + `>✨ Улучшить с ИИ</button><span class="ai-status"></span></div>`;
+  }
+  return html;
+}
+
+function renderWizard() {
+  const box = $("#wizard");
+  const pct = Math.round((current / STEPS.length) * 100);
+  let html = `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div style="width:${pct}%"></div></div>`;
+
+  if (current >= STEPS.length) {
+    html += `<h1>Резюме готово</h1>
+      <p class="hint">Выберите формат и нажмите «Скачать». Для PDF в окне печати выберите «Сохранить как PDF»; если там есть галочка «Колонтитулы» — отключите её.</p>
+      <label>Формат файла<select data-format="1">
+        <option value="pdf"${format === "pdf" ? " selected" : ""}>PDF</option>
+        <option value="doc"${format === "doc" ? " selected" : ""}>Word (.doc)</option></select></label>
+      <button class="primary ai-all" data-action="ai-all">✨ Обработать всё резюме с ИИ</button>
+      <p class="ai-status" aria-live="polite"></p>
+      <p class="hint">ИИ улучшит только заполненные тексты — «О себе», опыт и навыки. Имя, контакты, места работы и даты останутся без изменений.</p>
+      <div class="actions">
+        <button class="primary" data-action="download">Скачать</button>
+        <button data-action="back">Назад</button>
+        <button data-action="reset">Начать заново</button>
+      </div>`;
+  } else {
+    const s = STEPS[current];
+    html += `<h1>${esc(s.title)}</h1><p class="hint">${esc(s.hint || "")}</p>`;
+    if (s.type === "group") {
+      data[s.id].forEach((item, i) => {
+        html += `<div class="group">` + s.fields.map(f => fieldHTML(f, item[f.key] || "", s.id, i)).join("");
+        if (data[s.id].length > 1) html += `<button class="link" data-action="remove" data-group="${s.id}" data-idx="${i}">Удалить</button>`;
+        html += `</div>`;
+      });
+      html += `<button class="link" data-action="add" data-group="${s.id}">+ ${esc(s.addLabel || "Добавить")}</button>`;
+    } else {
+      html += s.fields.map(f => fieldHTML(f, data[f.key] || "", null, null)).join("");
+    }
+    html += `<div class="actions">
+      ${current > 0 ? `<button data-action="back">Назад</button>` : ""}
+      <button class="primary" data-action="next">${current === STEPS.length - 1 ? "Готово" : "Далее"}</button>
+    </div>`;
+  }
+  html += `<p class="ai-connection${aiConnected ? '' : ' warning'}" aria-live="polite">${esc(aiConnection)}</p>`;
+  html += `<p class="privacy">Ответы не сохраняются в базе сайта, после обновления вкладки они исчезают. При использовании ИИ тексты отправляются Google Gemini. На стороне провайдера действуют его условия обработки данных.</p>`;
+  box.innerHTML = html;
+}
+
+/* ============ 5. ШАБЛОН РЕЗЮМЕ (меняйте вёрстку здесь) ============ */
+function renderResume() {
+  const d = data;
+  const has = (arr) => (arr || []).filter(x => Object.values(x).some(v => v && v.trim()));
+  const exp = has(d.experience), edu = has(d.education);
+  const skills = (d.skills || "").split(",").map(x => x.trim()).filter(Boolean);
+  const birth = d.birth ? "род. " + fmtDate(d.birth) : "";
+  const contacts = [d.email, d.phone, d.city, birth].filter(Boolean).map(esc).join(" · ");
+
+  if (!d.name && !d.title && !d.summary && !d.photo && !exp.length && !edu.length && !skills.length) {
+    $("#resume").innerHTML = `<p class="empty">Здесь появится ваше резюме — отвечайте на вопросы слева.</p>`;
+    return;
+  }
+  let h = `<div class="head"><div><h2>${esc(d.name || "Ваше имя")}</h2>`;
+  if (d.title) h += `<div class="role">${esc(d.title)}</div>`;
+  if (contacts) h += `<div class="contacts">${contacts}</div>`;
+  h += `</div>${d.photo ? `<img class="photo" src="${d.photo}" alt="">` : ""}</div>`;
+  if (d.summary) h += `<h3>О себе</h3><p>${esc(d.summary)}</p>`;
+  if (exp.length) h += `<h3>Опыт работы</h3>` + exp.map(x =>
+    `<div class="item"><div class="item-head"><span>${esc(x.role)}${x.company ? ", " + esc(x.company) : ""}</span><span>${esc(x.period)}</span></div><p>${esc(x.desc)}</p></div>`).join("");
+  if (edu.length) h += `<h3>Образование</h3>` + edu.map(x =>
+    `<div class="item"><div class="item-head"><span>${esc(x.school)}${x.degree ? ", " + esc(x.degree) : ""}</span><span>${esc(x.period)}</span></div></div>`).join("");
+  if (skills.length) h += `<h3>Навыки</h3><div class="chips">${skills.map(s => `<span>${esc(s)}</span>`).join("")}</div>`;
+  $("#resume").innerHTML = h;
+}
+
+/* ============ 5.1 ЭКСПОРТ: PDF и Word ============ */
+function printPdf() {
+  const old = document.title;
+  document.title = "Резюме " + (data.name || "");   // название файла при сохранении
+  window.print();
+  document.title = old;
+}
+
+// Word: обычный HTML с типом application/msword — Word открывает его как документ.
+// Без колонтитулов, даты и номеров страниц. Если фото не видно в Word — вставьте его вручную.
+function downloadWord() {
+  const d = data, nl = (s) => esc(s).replace(/\n/g, "<br>");
+  const list = (a) => (a || []).filter(x => Object.values(x).some(v => v && v.trim()));
+  const exp = list(d.experience), edu = list(d.education);
+  const skills = (d.skills || "").split(",").map(x => x.trim()).filter(Boolean);
+  const contacts = [d.email, d.phone, d.city, d.birth ? "род. " + fmtDate(d.birth) : ""].filter(Boolean).map(esc).join(" · ");
+  const h3 = (t) => `<h3 style="font-size:12pt;border-bottom:1px solid #999;padding-bottom:2pt;margin:16pt 0 6pt">${t}</h3>`;
+  let b = `<table width="100%" style="border-collapse:collapse"><tr><td valign="middle">
+    <h1 style="font-size:22pt;margin:0">${esc(d.name || "Ваше имя")}</h1>
+    ${d.title ? `<p style="font-size:13pt;color:#2f5bea;margin:2pt 0">${esc(d.title)}</p>` : ""}
+    ${contacts ? `<p style="color:#555;margin:2pt 0">${contacts}</p>` : ""}</td>
+    ${d.photo ? `<td width="120" align="right"><img src="${d.photo}" width="105" height="105"></td>` : ""}</tr></table>`;
+  if (d.summary) b += h3("О себе") + `<p>${nl(d.summary)}</p>`;
+  if (exp.length) b += h3("Опыт работы") + exp.map(x =>
+    `<p style="margin:0 0 8pt"><b>${esc(x.role)}${x.company ? ", " + esc(x.company) : ""}</b>${x.period ? " — " + esc(x.period) : ""}<br>${nl(x.desc || "")}</p>`).join("");
+  if (edu.length) b += h3("Образование") + edu.map(x =>
+    `<p style="margin:0 0 8pt"><b>${esc(x.school)}${x.degree ? ", " + esc(x.degree) : ""}</b>${x.period ? " — " + esc(x.period) : ""}</p>`).join("");
+  if (skills.length) b += h3("Навыки") + `<p>${skills.map(esc).join(", ")}</p>`;
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head><meta charset="utf-8"><title></title>
+<style>@page Section1 { size: 21cm 29.7cm; margin: 2cm; } div.Section1 { page: Section1; }
+body { font-family: "Times New Roman", serif; font-size: 11pt; }</style></head>
+<body><div class="Section1">${b}</div></body></html>`;
+  const name = (d.name || "").replace(/[\\/:*?"<>|]/g, "").trim();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\ufeff", html], { type: "application/msword" }));
+  a.download = "Резюме" + (name ? " " + name : "") + ".doc";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ============ 6. СОБЫТИЯ ============ */
+// Ввод текста: обновляем данные и предпросмотр (форму не перерисовываем — не теряется фокус)
+$("#wizard").addEventListener("input", (e) => {
+  const { key, group, idx } = e.target.dataset;
+  if (!key) return;
+  let value = e.target.value;
+  if (e.target.type === "tel") {           // маска телефона
+    const p = formatPhone(value);
+    e.target.value = p.text;
+    value = p.digits ? p.text : "";
+  }
+  if (group) data[group][idx][key] = value; else data[key] = value;
+  renderResume();
+});
+
+// Телефон: при фокусе сразу подставляем +7
+$("#wizard").addEventListener("focusin", (e) => {
+  if (e.target.type === "tel" && !e.target.value) e.target.value = "+7 ";
+});
+
+// Загрузка фото
+$("#wizard").addEventListener("change", (e) => {
+  if (e.target.dataset.format) { format = e.target.value; return; }
+  if (!e.target.dataset.photo || !e.target.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = () => { data.photo = reader.result; renderWizard(); renderResume(); };
+  reader.readAsDataURL(e.target.files[0]);
+});
+
+// Кнопки
+$("#wizard").addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+  const { action, group, idx } = btn.dataset;
+  if (action === "ai") { improveField(btn); return; }
+  if (action === "ai-all") { improveWholeResume(btn); return; }
+  if (action === "download") { format === "doc" ? downloadWord() : printPdf(); return; }
+  if (action === "next")  current++;
+  if (action === "back")  current--;
+  if (action === "add")   data[group].push({});
+  if (action === "remove") data[group].splice(Number(idx), 1);
+  if (action === "remove-photo") data.photo = "";
+  if (action === "reset") { initData(); current = 0; }
+  renderWizard(); renderResume();
+});
+
+$("#cities").innerHTML = CITIES.map(c => `<option value="${c}">`).join("");
+initData(); renderWizard(); renderResume(); checkAiConnection();
+</script>
+</body>
+</html>
