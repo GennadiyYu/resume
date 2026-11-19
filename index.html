@@ -157,8 +157,8 @@ function formatPhone(raw) {
 }
 const fmtDate = (iso) => iso ? iso.split("-").reverse().join(".") : "";
 
-/* ============ 3.2 ИИ (Gemini) ============ */
-async function askGemini(ai, text) {
+/* ============ 3.2 ИИ (GroqCloud) ============ */
+async function askGroq(ai, text) {
   let res;
   try {
     res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ai, text }) });
@@ -175,7 +175,7 @@ async function improveField(btn) {
   if (!el.value.trim()) { status.textContent = "Сначала напишите хоть пару слов."; return; }
   btn.disabled = true; status.textContent = "ИИ работает…";
   try {
-    el.value = await askGemini(ai, el.value);
+    el.value = await askGroq(ai, el.value);
     if (group) data[group][idx][key] = el.value; else data[key] = el.value;
     renderResume();
     status.textContent = "Готово — можно поправить вручную.";
@@ -302,7 +302,7 @@ function renderWizard() {
     </div>`;
   }
   html += `<p class="ai-connection${aiConnected ? '' : ' warning'}" aria-live="polite">${esc(aiConnection)}</p>`;
-  html += `<p class="privacy">Ответы не сохраняются в базе сайта, после обновления вкладки они исчезают. При использовании ИИ тексты отправляются Google Gemini. На стороне провайдера действуют его условия обработки данных.</p>`;
+  html += `<p class="privacy">Ответы не сохраняются в базе сайта, после обновления вкладки они исчезают. При использовании ИИ тексты отправляются в GroqCloud для обработки. На стороне провайдера действуют его условия обработки данных.</p>`;
   box.innerHTML = html;
 }
 
