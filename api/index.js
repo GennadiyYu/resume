@@ -82,10 +82,10 @@ module.exports = async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'X-Content-Type-Options': 'nosniff' });
     return res.end(fs.readFileSync(path.join(__dirname, 'index.html')));
   }
-  if (req.method === 'GET' && pathname === '/api/status')
+  if (req.method === 'GET' && (pathname === '/api/status' || pathname === '/api/index'))
     return send(res, 200, { server: true, keyConfigured: HAS_KEY, model: MODEL });
 
-  if (req.method === 'POST' && pathname === '/api/ai') {
+  if (req.method === 'POST' && (pathname === '/api/ai' || pathname === '/api/index')) {
     let body = '';
     try {
       for await (const chunk of req) {
