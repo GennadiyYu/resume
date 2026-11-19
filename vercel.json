@@ -3,16 +3,12 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/status",
-      "destination": "/api/index"
     },
-    {
-      "source": "/api/ai",
-      "destination": "/api/index"
+    "api/ai.js": {
+      "maxDuration": 60
+    },
+    "api/status.js": {
+      "maxDuration": 10
     }
-  ]
+  }
 }
